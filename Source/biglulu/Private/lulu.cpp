@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/CapsuleComponent.h"
 #include "EngineUtils.h"
+#include "Engine/Engine.h"
 
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -63,6 +64,7 @@ void Alulu::BeginPlay()
 	SetActorEnableCollision(true);
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &Alulu::OnCollision);
 	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &Alulu::EndCollision);
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "molemole!!!!");
 }
 
 // Called every frame

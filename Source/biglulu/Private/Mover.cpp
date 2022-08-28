@@ -16,7 +16,7 @@ AMover::AMover()
 
 	MoverMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
 	MoverMesh->SetupAttachment(CollisionMesh);
-
+	
 	canMove = false;
 	SetActorEnableCollision(true);
 }
