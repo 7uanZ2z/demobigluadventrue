@@ -91,6 +91,7 @@ function BP_PlayerCharacter:FlyBlood()
     end
 end
 
+
 function BP_PlayerCharacter:Fire(Time)
     local Direction = self.ProjectileDirection:GetForwardVector()
     local Rotation = UE.UKismetMathLibrary.FindLookAtRotation(UE.FVector(0.0,0.0,0.0), Direction)
@@ -105,6 +106,9 @@ function BP_PlayerCharacter:Fire(Time)
 	sp.Instigator = self
 
     local AlwaysSpawn = UE.ESpawnActorCollisionHandlingMethod.AlwaysSpawn
+    if ProjectileClass == nil then
+        print("nononono!")
+    end
     local Projectile = World:SpawnActor(ProjectileClass, Transform, sp) 
     Projectile:Shoot(Direction, Time)
 end
