@@ -8,14 +8,69 @@
 
 require "UnLua"
 local Screen = require "Screen"
-local WorldMapWnd = Class()
+WorldMapWnd = Class()
 
-function WorldMapWnd:DrawMapBlock(x, y, divX, divY)
+WorldMapWnd.MapType = {
+    ["NoVis"] = 1,
+    ["Vis"] = 2,
+    ["Lulu"] = 3,
+    ["Boss"] = 4,
+}
+function WorldMapWnd:DrawMapBlock(x, y, divX, divY, type)
     if self.divX == nil and divX ~= nil then self.divX = divX end
     if self.divY == nil and divY ~= nil then self.divY = divY end
+    if divX == nil then divX = self.divX end
+    if divY == nil then divY = self.divY end
+
+    if self.BlockWnd == nil then self.BlockWnd = {} end
+    if self.BlockWnd[x] == nil then self.BlockWnd[x] = {} end
+
+    local widget_class
+    if type == nil or type == WorldMapWnd.MapType.NoVis then
+        widget_class = UE.UClass.Load("/Game/WorldMapSystem/W_NoVisBlock.W_NoVisBlock_C")
+    elseif type == WorldMapWnd.MapType.Vis then
+        widget_class = UE.UClass.Load("/Game/WorldMapSystem/W_VisBlock.W_VisBlock_C")
+    elseif type == WorldMapWnd.MapType.Lulu then
+        widget_class = UE.UClass.Load("/Game/WorldMapSystem/W_luluBlock.W_luluBlock_C")
+    elseif type == WorldMapWnd.MapType.Boss then
+        widget_class = UE.UClass.Load("/Game/WorldMapSystem/W_BearBlock.W_BearBlock_C")
+    end
     
+    local flag = nil
+    
+    if self.BlockWnd[self.LuluX][self.LuluY] ~= nil and type == WorldMapWnd.MapType.Lulu then 
+        local vis_class = UE.UClass.Load("/Game/WorldMapSystem/W_VisBlock.W_VisBlock_C")
+        self.BlockWnd[self.LuluX][self.LuluY]:RemoveFromParent()
+        self.BlockWnd[self.LuluX][self.LuluY] = self:DrawBlock(self.LuluX, self.LuluY, divX, divY, vis_class)
+        self.LuluX = x
+        self.LuluY = y
+    end
+    if type == WorldMapWnd.MapType.Lulu then 
+        self.LuluX = x
+        self.LuluY = y
+    end
+    
+    if x == self.BossX and y == self.BossY  then 
+        return
+    end
+
+    if self.BlockWnd[x][y] ~= nil then 
+        self.BlockWnd[x][y]:RemoveFromParent()
+    end
+    local image = self:DrawBlock(x, y, divX, divY, widget_class)
+    self.BlockWnd[x][y] = image
+
+    return image
+end
+
+function WorldMapWnd:DrawBlock(x, y, divX, divY, widget_class)
+    if self.divX == nil and divX ~= nil then self.divX = divX end
+    if self.divY == nil and divY ~= nil then self.divY = divY end
+    if divX == nil then divX = self.divX end
+    if divY == nil then divY = self.divY end
+
     local parent = self.MapCanvas
-    local image = NewObject(UE.UImage)
+    local image = NewObject(widget_class)
     local parentsize = parent.Slot:GetSize()
     local Xsize = parentsize.X / divX
     local Ysize = parentsize.Y / divY
@@ -42,7 +97,7 @@ function WorldMapWnd:InitCharacterBlock(divX, divY)
     self.m_CharacterBlock = CharacterBlock
     local parent = self.MapCanvas
     local parentsize = parent.Slot:GetSize()
-    print("lulumole ",parentsize.X, parentsize.Y)
+    
     local Xsize = CharacterBlock.SizeRate * parentsize.X / self.divX
     local Ysize = CharacterBlock.SizeRate * parentsize.Y / self.divY
     local anchors = UE.FAnchors(0.0)
@@ -74,8 +129,13 @@ function WorldMapWnd:ClearMap()
 end
 
 
--- function WorldMapWnd:Initialize(Initializer)
--- end
+function WorldMapWnd:Initialize(Initializer)
+    self.BlockWnd = { [-1] = {},}
+    self.LuluX = -1
+    self.LuluY = -1
+    self.BossX = -1
+    self.BossY = -1
+end
 
 --function WorldMapWnd:PreConstruct(IsDesignTime)
 --end

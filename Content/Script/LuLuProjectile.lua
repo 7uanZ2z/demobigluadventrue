@@ -29,7 +29,8 @@ function LuLuProjectile:ReceiveBeginPlay()
     self.Sphere:SetWorldScale3D(FVector(s, s, s))
     self.TimerHandle = UE.UKismetSystemLibrary.K2_SetTimerDelegate({self, LuLuProjectile.LifeEnd}, 5.0, false)
     self.SphereCollision.OnComponentBeginOverlap:Add(self, LuLuProjectile.OnComponentHit_Sphere)
-    print("Bind!!!!!!")
+    local EatSound = UE.UObject.Load("/Game/Sound/lu_cue.lu_cue")
+    UE.UGameplayStatics.PlaySound2D(self, EatSound) 
 end
 
 function LuLuProjectile:LifeEnd()
@@ -50,6 +51,10 @@ function LuLuProjectile:OnComponentHit_Sphere(HitComponent, OtherActor, OtherCom
 	if Character then
         print("Hit Boss!")
         self:K2_DestroyActor()
+        local PlayerCharacter = UE.UGameplayStatics.GetPlayerCharacter(self, 0)
+        if PlayerCharacter.BlockX ~= Character.BlockX or PlayerCharacter.BlockY ~= Character.BlockY then 
+            return 
+        end
         Character:Damaged()
 	end
 
@@ -57,6 +62,10 @@ function LuLuProjectile:OnComponentHit_Sphere(HitComponent, OtherActor, OtherCom
 	if Character then
         print("Hit ququ!")
         self:K2_DestroyActor()
+        local PlayerCharacter = UE.UGameplayStatics.GetPlayerCharacter(self, 0)
+        if PlayerCharacter.BlockX ~= Character.BlockX or PlayerCharacter.BlockY ~= Character.BlockY then 
+            return 
+        end
         Character:Damaged()
 	end
 end

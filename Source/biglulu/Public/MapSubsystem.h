@@ -59,6 +59,10 @@ struct FPointAndConner {
 	bool Left;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool Right;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool IsEnd;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool IsStart;
 };
 
 /**
@@ -89,7 +93,7 @@ public:
 	TArray<FMapArray> GetMapMatrix();
 
 	UFUNCTION(BlueprintCallable, Category = "MapSubsystem")
-	TArray<FPointAndConner> SetNewMap(int l, int w, int mainLength);
+	TArray<FPointAndConner> SetNewMap(int l, int w, int mainLength, int BranchSum);
 
 	UFUNCTION(BlueprintCallable, Category = "MapSubsystem")
 	void SetPointValue(int Index, int Value);

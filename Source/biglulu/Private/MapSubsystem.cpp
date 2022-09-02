@@ -49,7 +49,7 @@ TArray<FMapArray> UMapSubsystem::GetMapMatrix()
 	return MapMatrix;
 }
 
-TArray<FPointAndConner> UMapSubsystem::SetNewMap(int l, int w, int mainLength)
+TArray<FPointAndConner> UMapSubsystem::SetNewMap(int l, int w, int mainLength, int BranchSum)
 {
 	length = l;
 	width = w;
@@ -122,7 +122,7 @@ TArray<FPointAndConner> UMapSubsystem::SetNewMap(int l, int w, int mainLength)
 
 	PrintMap(mainLength);
 
-	int BranchSum = 8;
+	//int BranchSum = 8;
 	for (int T = 1; T <= BranchSum; ++T) {
 		int PointSampling = FMath::RandRange(1, GetAllPointSum());
 		int nowPoint = GetPointFromValue(PointSampling);
@@ -232,16 +232,23 @@ TArray<FPointAndConner> UMapSubsystem::SetNewMap(int l, int w, int mainLength)
 	initPointConner.Down = false;
 	initPointConner.Left = false;
 	initPointConner.Right = false;
+	initPointConner.IsEnd = false;
+	initPointConner.IsStart = false;
 
 	for (unsigned int i = 0; i < length; ++i) {
 		for (unsigned int j = 0; j < width; ++j) {
 			if (MapMatrix[i].a[j].vis == true) {
+				
 				initPointConner.X = i + 1;
 				initPointConner.Y = j + 1;
 				initPointConner.Up = MapMatrix[i].a[j].up;
 				initPointConner.Down = MapMatrix[i].a[j].down;
 				initPointConner.Left = MapMatrix[i].a[j].left;
 				initPointConner.Right = MapMatrix[i].a[j].right;
+				initPointConner.IsStart = MapMatrix[i].a[j].depth == 1 ? true : false;
+				initPointConner.IsEnd = MapMatrix[i].a[j].depth == mainLength ? true : false;
+				UE_LOG(LogTemp, Warning, TEXT("RetPointList X %d Y %d"), initPointConner.X, initPointConner.Y);
+
 				RetPointList.Emplace(initPointConner);
 			}
 		}

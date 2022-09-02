@@ -11,6 +11,7 @@ local Screen = require "Screen"
 local WndMgr = require "WndMgr"
 
 local BP_PlayerCharacter = Class()
+local ModeClass = UE.UClass.Load("/Game/BluePrint/BP_bigluluShootGameMode.BP_bigluluShootGameMode_C")
 
 --function BP_PlayerCharacter:Initialize(Initializer)
 --end
@@ -28,6 +29,8 @@ function BP_PlayerCharacter:ReceiveBeginPlay()
     self.MaxTime = 3
     self.FireTime = 1
     self.IsFiring = false
+    self.RewardTouch = nil
+    self.HavePressedMouseLeft = false
     
 
     --local widget_class = UE.UClass.Load("/Game/UI/PlayingWnd.PlayingWnd_C")
@@ -42,16 +45,39 @@ function BP_PlayerCharacter:M_Pressed()
 end
 
 function BP_PlayerCharacter:B_Pressed()
-    self:BeDamaged()
+    self:Damaged()
+end
+
+function BP_PlayerCharacter:P_Pressed()
+    local GameMode = UE.UGameplayStatics.GetGameMode(self)
+    local ShootMode = GameMode:Cast(ModeClass)
+    if ShootMode then
+        ShootMode:Lose()
+    end
 end
 
 function BP_PlayerCharacter:LeftMouseButton_Pressed()
+    if self.RewardTouch ~= nil then
+        local GameMode = UE.UGameplayStatics.GetGameMode(self)
+        local ShootMode = GameMode:Cast(ModeClass)
+        if ShootMode then
+            ShootMode:GetReward(self.RewardTouch.RewardType)
+            self.RewardTouch:K2_DestroyActor()
+            self.RewardTouch = nil
+            local EatSound = UE.UObject.Load("/Game/Sound/eat_cue.eat_cue") 
+            UE.UGameplayStatics.PlaySound2D(self, EatSound) 
+        end
+        return 
+    end
     self.Progress:PlayAnimation(self.Progress.Animation_Show)
     self.TotolTime = 0
     self.IsFiring = true
+    self.HavePressedMouseLeft = true
 end
 
 function BP_PlayerCharacter:LeftMouseButton_Released()
+    if self.HavePressedMouseLeft == false then return end
+    self.HavePressedMouseLeft = false
     self.Progress:PlayAnimation(self.Progress.Animation_Hide)
 
     if self.TotolTime > self.FireTime then
@@ -62,13 +88,20 @@ function BP_PlayerCharacter:LeftMouseButton_Released()
     self.IsFiring = false
 end
 
-function BP_PlayerCharacter:BeDamaged(damage)
+function BP_PlayerCharacter:Damaged(damage)
     if damage ~= nil then
-        -- todo
+        local GameMode = UE.UGameplayStatics.GetGameMode(self)
+        local ShootMode = GameMode:Cast(ModeClass)
+        if ShootMode then
+            ShootMode:Damaged(damage)
+        end
     end
     print("GetDamage!!!")
     self.BloodTotal = 5
-    self.FlyBloodTimer = UE.UKismetSystemLibrary.K2_SetTimerDelegate({self, self.FlyBlood}, 0.2, true)
+    self:FlyBlood()
+    self:FlyBlood()
+    self:FlyBlood()
+    self.FlyBloodTimer = UE.UKismetSystemLibrary.K2_SetTimerDelegate({self, self.FlyBlood}, 0.15, true)
     
 end
 
@@ -97,9 +130,9 @@ function BP_PlayerCharacter:Fire(Time)
     local Rotation = UE.UKismetMathLibrary.FindLookAtRotation(UE.FVector(0.0,0.0,0.0), Direction)
     local World = self:GetWorld()
     local ProjectileClass = self.ProjectileClass
-    local MyTransform = self:GetTransform()
+    local MyLocation = self.ProjectileDirection:K2_GetComponentLocation()
     
-    local Transform = UE.FTransform(Rotation:ToQuat(), MyTransform.Translation)
+    local Transform = UE.FTransform(Rotation:ToQuat(), MyLocation)
     local sp = UE.FActorSpawnParameters()
 	sp.SpawnCollisionHandlingOverride = UE.ESpawnActorCollisionHandlingMethod.AlwaysSpawn
 	sp.Owner = self
@@ -115,6 +148,11 @@ end
 
 --function BP_PlayerCharacter:ReceiveEndPlay()
 --end
+
+function BP_PlayerCharacter:SetRewardTouch(actor)
+    self.RewardTouch = actor
+end
+
 
 function BP_PlayerCharacter:ReceiveTick(DeltaSeconds)
     if self.IsFiring then

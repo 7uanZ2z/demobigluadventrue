@@ -6,8 +6,8 @@ function M.SetMapConner(WorldMap)
     WorldMap.DownRightConner = M.MapSystem:GetActorInLevelByName("LowerRight")
 end
 
-function M.NewRandomMap(length, width, mainlength)
-    return M.MapSystem:SetNewMap(length, width, mainlength)
+function M.NewRandomMap(length, width, mainlength, branchlength)
+    return M.MapSystem:SetNewMap(length, width, mainlength, branchlength)
 end
 
 return M

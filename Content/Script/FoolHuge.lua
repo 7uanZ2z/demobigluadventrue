@@ -17,14 +17,17 @@ local FoolHuge = Class()
 --end
 
 function FoolHuge:ReceiveBeginPlay()
-    self.Life = 10
-    self.MaxLife = 10
+    self.Life = 5
+    self.MaxLife = 5
+
+    self.BoxCollision.OnComponentBeginOverlap:Add(self, FoolHuge.OnComponentOverlap)
 end
 
 local ModeClass = UE.UClass.Load("/Game/BluePrint/BP_bigluluShootGameMode.BP_bigluluShootGameMode_C")
 
-function FoolHuge:Damaged()
-    self.Life = self.Life - 1
+function FoolHuge:Damaged(damage)
+    damage = damage or 1
+    self.Life = self.Life - damage
     
     local GameMode = UE.UGameplayStatics.GetGameMode(self)
     local ShootMode = GameMode:Cast(ModeClass)
@@ -37,6 +40,15 @@ function FoolHuge:Damaged()
             ShootMode:DecreseEnemy()
         end
     end
+end
+
+local luluClass = UE.UClass.Load("/Game/BluePrint/character/BP_lulu2.BP_lulu2_C")
+
+function FoolHuge:OnComponentOverlap(HitComponent, OtherActor, OtherComp, NormalImpulse, Hit)
+    local Character = OtherActor:Cast(luluClass)
+	if Character then
+        Character:Damaged(999)
+	end
 end
 
 --function FoolHuge:ReceiveEndPlay()
